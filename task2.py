@@ -10,7 +10,7 @@ import pandas as pd
 import streamlit as st
 
 def load_data():
-    data = pd.read_csv(r'C:\Users\Matus\PycharmProjects\PythonDataStructuresAndAlgorithmsCourse\DeltaGreen\Task1.csv', parse_dates=['time'], index_col='time')
+    data = pd.read_csv(r'Task1.csv', parse_dates=['time'], index_col='time')
     data.columns = ['consumption_power']
 
     # Converting Watts to Killowats
@@ -37,7 +37,7 @@ if menu == 'Task 1':
 if menu == 'Task 2':
     @st.cache
     def load_data():
-        data = pd.read_csv(r'C:\Users\Matus\PycharmProjects\PythonDataStructuresAndAlgorithmsCourse\DeltaGreen\Task2.csv')
+        data = pd.read_csv(r'Task2.csv')
         data.columns = ['id', 'timestamp', 'control_mode', 'manufacturer', 'battery_capacity']
         return data
 
