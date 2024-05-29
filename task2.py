@@ -39,6 +39,7 @@ if menu == 'Task 2':
     def load_data():
         data = pd.read_csv(r'Task2.csv')
         data.columns = ['id', 'timestamp', 'control_mode', 'manufacturer', 'battery_capacity']
+        data.dropna(subset=['battery_capacity'], inplace=True)
         return data
 
     data = load_data()
