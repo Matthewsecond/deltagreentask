@@ -28,7 +28,7 @@ if menu == 'Task 1':
 
     # Display data as a table
     st.subheader('Data')
-    st.write(data)
+    st.write(data[['kW']])
 
     # Display data as a line chart
     st.subheader('Energy consumption (kW/h)')
@@ -142,6 +142,9 @@ if menu == 'Task 2':
                            'num_unique_ids': 'Number of Unique Active IDs'
                            })
     st.plotly_chart(fig2)
+
+    #exclude columns most_common_mode, most_common_manufacturer and modes_count
+    capacity_by_date = capacity_by_date.drop(columns=['most_common_mode', 'most_common_manufacturer', 'modes_count', 'num_unique_manufacturers'])
 
     # Create a table with Streamlit
     st.table(capacity_by_date)
