@@ -3,11 +3,9 @@ import streamlit as st
 import plotly.graph_objs as go
 import plotly.express as px
 
-
-
-
 import pandas as pd
 import streamlit as st
+
 
 def load_data():
     data = pd.read_csv(r'Task1.csv', parse_dates=['time'], index_col='time')
@@ -17,11 +15,26 @@ def load_data():
     data['kW'] = data['consumption_power'] / 1000
 
     # Grouping by an hour period to get kW/h
-    data = data.resample('H').sum()
+    data = data.resample('H').mean()
 
     return data
 
+
 menu = st.sidebar.selectbox('Menu', ['Task 1', 'Task 2'])
+
+def create_donut_chart(data):
+    labels = data.index.strftime('%Y-%m-%d %H:%M:%S')
+    values = data['kW'].tolist()
+
+    fig = go.Figure(data=[go.Pie(labels=labels, values=values, hole=.3)])
+
+    fig.update_layout(
+        title="Hourly Consumption in KiloWatt",
+        annotations=[dict(text="kW", showarrow=False)]
+    )
+
+    return fig
+
 
 if menu == 'Task 1':
     data = load_data()
@@ -34,6 +47,11 @@ if menu == 'Task 1':
     st.subheader('Energy consumption (kW/h)')
     st.line_chart(data['kW'])
 
+    # Display data as a donut chart
+    st.subheader('Energy consumption (kW/hour)')
+    hourly_consumption_chart = create_donut_chart(data)
+    st.plotly_chart(hourly_consumption_chart)
+
 if menu == 'Task 2':
     @st.cache
     def load_data():
@@ -41,6 +59,7 @@ if menu == 'Task 2':
         data.columns = ['id', 'timestamp', 'control_mode', 'manufacturer', 'battery_capacity']
         data.dropna(subset=['battery_capacity'], inplace=True)
         return data
+
 
     data = load_data()
     devices = data['id'].unique()
@@ -55,7 +74,7 @@ if menu == 'Task 2':
     filtered_data['timestamp'] = pd.to_datetime(filtered_data['timestamp'])
     filtered_data['date'] = filtered_data['timestamp'].dt.date
 
-    fig = go.Figure()  # Create figure outside loop
+    fig = go.Figure()
 
     for device in selected_devices:
         device_data = filtered_data[filtered_data['id'] == device].sort_values('timestamp')
@@ -123,7 +142,8 @@ if menu == 'Task 2':
     capacity_by_date['manufacturers_count'] = capacity_by_date['manufacturers_count'].apply(str)
 
     # Re-adjust other calculations
-    capacity_by_date['weekly_capacity'] = (capacity_by_date['total_capacity'] / capacity_by_date['total_capacity'].sum()) * 100
+    capacity_by_date['weekly_capacity'] = (capacity_by_date['total_capacity'] / capacity_by_date[
+        'total_capacity'].sum()) * 100
     capacity_by_date['weekly_capacity'] = capacity_by_date['weekly_capacity'].round(2)
     capacity_by_date['daily_change'] = capacity_by_date['total_capacity'].pct_change() * 100
     capacity_by_date['daily_change'] = capacity_by_date['daily_change'].round(2)
@@ -131,9 +151,9 @@ if menu == 'Task 2':
     # Update hover_data in plotting
     fig2 = px.line(capacity_by_date, x="date", y="total_capacity",
                    hover_data=["weekly_capacity", "daily_change",
-                                'modes_count',
-                                 'manufacturers_count', 'most_common_mode',
-                                'most_common_manufacturer', 'num_unique_ids'],
+                               'modes_count',
+                               'manufacturers_count', 'most_common_mode',
+                               'most_common_manufacturer', 'num_unique_ids'],
                    labels={'weekly_capacity': 'Weekly Capacity %',
                            'daily_change': 'Daily Change %',
                            'modes_count': 'Mode Counts',
@@ -144,8 +164,9 @@ if menu == 'Task 2':
                            })
     st.plotly_chart(fig2)
 
-    #exclude columns most_common_mode, most_common_manufacturer and modes_count
-    capacity_by_date = capacity_by_date.drop(columns=['most_common_mode', 'most_common_manufacturer', 'modes_count', 'num_unique_manufacturers'])
+    # exclude columns most_common_mode, most_common_manufacturer and modes_count
+    capacity_by_date = capacity_by_date.drop(
+        columns=['most_common_mode', 'most_common_manufacturer', 'modes_count', 'num_unique_manufacturers'])
 
     # Create a table with Streamlit
     st.table(capacity_by_date)
