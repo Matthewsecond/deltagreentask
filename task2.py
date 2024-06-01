@@ -58,6 +58,14 @@ if menu == 'Task 2':
         data = pd.read_csv(r'Task2.csv')
         data.columns = ['id', 'timestamp', 'control_mode', 'manufacturer', 'battery_capacity']
         data.dropna(subset=['battery_capacity'], inplace=True)
+
+        # Sorting data by 'timestamp', just for guarantee
+        data['timestamp'] = pd.to_datetime(data['timestamp'])
+        data = data.sort_values('timestamp')
+
+        # Forward fill missing values
+        data.ffill(inplace=True)
+
         return data
 
 
